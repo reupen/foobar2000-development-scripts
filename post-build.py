@@ -27,7 +27,7 @@ def main():
     annotation = f"-{version}" if os.getenv("CI") else ""
     platform = PLATFORM_MAPPING[args.platform]
     output_path = (
-        f"{args.output_dir}{input_base_name}{annotation}.{platform}.fb2k_component"
+        f"{args.output_dir}{input_base_name}{annotation}.{platform}.fb2k-component"
     )
 
     with ZipFile(output_path, "w") as zip_file:
