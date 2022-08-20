@@ -4,10 +4,9 @@ import subprocess
 import tomllib
 from functools import cache
 from pathlib import Path
-from zipfile import ZIP_DEFLATED, ZIP_LZMA, ZipFile
-from zlib import Z_BEST_COMPRESSION
 
 from utils.version import get_version
+from utils.zip import write_zip
 
 BUILD_CONFIG_FILE_NAME = "build-config.toml"
 
@@ -38,20 +37,6 @@ def build(msbuild_path, platform, solution_path):
         ],
         check=True,
     )
-
-
-def write_zip(zip_path, files, use_lzma=False):
-    with ZipFile(
-        zip_path,
-        "w",
-        compression=ZIP_LZMA if use_lzma else ZIP_DEFLATED,
-        compresslevel=None if use_lzma else Z_BEST_COMPRESSION,
-    ) as zip_file:
-        for external_path, internal_path in files:
-            zip_file.write(
-                external_path,
-                internal_path,
-            )
 
 
 def main():
