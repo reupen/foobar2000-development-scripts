@@ -1,9 +1,9 @@
 import argparse
 import os
 from pathlib import PurePath
-from zipfile import ZipFile
 
 from utils.version import get_version
+from utils.zip import write_zip
 
 parser = argparse.ArgumentParser()
 parser.add_argument("component_path", type=str)
@@ -30,11 +30,7 @@ def main():
         f"{args.output_dir}{input_base_name}{annotation}.{platform}.fb2k-component"
     )
 
-    with ZipFile(output_path, "w") as zip_file:
-        zip_file.write(
-            component_path,
-            component_path.name,
-        )
+    write_zip(output_path, [(component_path, component_path.name)])
 
     print(f"Archive created: {output_path}")
 
