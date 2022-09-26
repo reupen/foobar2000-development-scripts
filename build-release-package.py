@@ -1,4 +1,5 @@
 #!/usr/bin/env python3.11
+import argparse
 import os
 import subprocess
 import tomllib
@@ -9,6 +10,10 @@ from utils.version import get_version
 from utils.zip import write_zip
 
 BUILD_CONFIG_FILE_NAME = "build-config.toml"
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--no-symstore", action="store_true")
 
 
 @cache
@@ -39,7 +44,31 @@ def build(msbuild_path, platform, solution_path):
     )
 
 
+def add_to_symbol_store(path, component_name, version):
+    program_files_x86_path = os.environ["ProgramFiles(x86)"]
+    symbols_path = os.environ["FB2K_SYMBOL_STORE"]
+
+    print(f"\nAdding file to symbol store: {path}")
+
+    subprocess.run(
+        [
+            rf"{program_files_x86_path}\Windows Kits\10\Debuggers\x64\symstore.exe",
+            "add",
+            "/f",
+            path,
+            "/s",
+            symbols_path,
+            "/t",
+            component_name,
+            "/v",
+            str(version),
+        ],
+        check=True,
+    )
+
+
 def main():
+    args = parser.parse_args()
     root_dir = get_root_dir()
 
     with open(root_dir / "build-config.toml", "rb") as file:
@@ -85,17 +114,16 @@ def main():
     print("Building component package...")
     print(f"Output path: {component_archive_path}")
 
+    x86_dll_path = root_dir / x86_build_path / f"{component_name}.dll"
+    x86_pdb_path = root_dir / x86_build_path / f"{component_name}.pdb"
+    x64_dll_path = root_dir / x64_build_path / f"{component_name}.dll"
+    x64_pdb_path = root_dir / x64_build_path / f"{component_name}.pdb"
+
     write_zip(
         component_archive_path,
         [
-            (
-                root_dir / x86_build_path / f"{component_name}.dll",
-                rf"{component_name}.dll",
-            ),
-            (
-                root_dir / x64_build_path / f"{component_name}.dll",
-                rf"x64\{component_name}.dll",
-            ),
+            (x86_dll_path, rf"{component_name}.dll"),
+            (x64_dll_path, rf"x64\{component_name}.dll"),
         ],
     )
 
@@ -108,17 +136,21 @@ def main():
     write_zip(
         symbols_archive_path,
         [
-            (
-                root_dir / x86_build_path / f"{component_name}.pdb",
-                rf"{component_name}.pdb",
-            ),
-            (
-                root_dir / x64_build_path / f"{component_name}.pdb",
-                rf"x64\{component_name}.pdb",
-            ),
+            (x86_pdb_path, rf"{component_name}.pdb"),
+            (x64_pdb_path, rf"x64\{component_name}.pdb"),
         ],
         use_lzma=True,
     )
+
+    if args.no_symstore:
+        print("Skipping update of symbol store...")
+        print("Done!")
+        return
+
+    symstore_paths = [x86_dll_path, x86_pdb_path, x64_dll_path, x64_pdb_path]
+
+    for path in symstore_paths:
+        add_to_symbol_store(path, component_name, version)
 
     print("Done!")
 
