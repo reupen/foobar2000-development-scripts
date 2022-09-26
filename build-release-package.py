@@ -36,6 +36,7 @@ def build(msbuild_path, platform, solution_path):
     subprocess.run(
         [
             msbuild_path,
+            "/m",
             f"/p:Configuration=Release;Platform={platform}",
             "/t:Rebuild",
             root_dir / solution_path,
