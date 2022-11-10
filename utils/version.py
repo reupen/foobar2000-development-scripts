@@ -10,16 +10,21 @@ _VERSION_REGEX = re.compile(
 
 
 def get_version():
-    describe_result = subprocess.run(
-        ["git", "describe", "--tags", "--dirty", "--match", "v[0-9]*", "--long"],
-        capture_output=True,
-        check=True,
-    )
+    null_version = _Version("0.0.0", 0, "unknown", False)
+
+    try:
+        describe_result = subprocess.run(
+            ["git", "describe", "--tags", "--dirty", "--match", "v[0-9]*", "--long"],
+            capture_output=True,
+            check=True,
+        )
+    except subprocess.SubprocessError:
+        return null_version
 
     match_result = _VERSION_REGEX.match(describe_result.stdout.decode("utf-8"))
 
     if not match_result:
-        return _Version("0", 0, "unknown", False)
+        return null_version
 
     return _Version(
         match_result["version"],
