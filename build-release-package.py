@@ -2,10 +2,11 @@
 import argparse
 import os
 import subprocess
-import tomllib
-from functools import cache
 from pathlib import Path
 
+from utils.config import get_build_config
+from utils.licence import generate_licence_text
+from utils.path import get_root_dir
 from utils.version import get_version
 from utils.zip import write_zip
 
@@ -14,21 +15,6 @@ BUILD_CONFIG_FILE_NAME = "build-config.toml"
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--no-symstore", action="store_true")
-
-
-@cache
-def get_root_dir():
-    parent_dir = Path(__file__).parent
-    root_dir = parent_dir
-    while not (root_dir / BUILD_CONFIG_FILE_NAME).exists():
-        root_dir = root_dir.parent
-
-        if not root_dir:
-            raise FileNotFoundError(
-                f"{BUILD_CONFIG_FILE_NAME} not found in any parent directories."
-            )
-
-    return root_dir
 
 
 def build(msbuild_path, platform, solution_path):
@@ -72,8 +58,7 @@ def main():
     args = parser.parse_args()
     root_dir = get_root_dir()
 
-    with open(root_dir / "build-config.toml", "rb") as file:
-        build_config = tomllib.load(file)
+    build_config = get_build_config()
 
     component_name = build_config["component_name"]
     solution_path = build_config["solution_path"]
@@ -120,12 +105,21 @@ def main():
     x64_dll_path = root_dir / x64_build_path / f"{component_name}.dll"
     x64_pdb_path = root_dir / x64_build_path / f"{component_name}.pdb"
 
+    licences = [
+        (licence["title"], root_dir / licence["path"])
+        for licence in build_config.get("licences", [])
+    ]
+    memory_files = {
+        "LICENSE.txt": generate_licence_text(licences),
+    }
+
     write_zip(
         component_archive_path,
         [
             (x86_dll_path, rf"{component_name}.dll"),
             (x64_dll_path, rf"x64\{component_name}.dll"),
         ],
+        memory_files=memory_files,
     )
 
     symbols_archive_name = f"{component_name}-{version}.x86-x64.symbols.lzma.zip"
