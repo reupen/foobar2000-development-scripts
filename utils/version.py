@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from itertools import chain
 
 _VERSION_REGEX = re.compile(
-    r"^v(?P<version>.+)-(?P<distance>\d+)-g(?P<commit>[0-9a-f]{7})(-(?P<dirty>dirty))?$",
+    r"^v(?P<version>.+)-(?P<distance>\d+)-g(?P<commit>[0-9a-f]+)(-(?P<dirty>dirty))?$",
 )
 
 
