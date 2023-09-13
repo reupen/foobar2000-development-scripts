@@ -9,12 +9,21 @@ def main():
     with open("version.h.template", "r", encoding="utf-8") as file:
         template = file.read()
 
-    contents_to_write = template.replace(
-        "${{ Date }}",
-        date.today().strftime("%#d %B %Y"),
-    ).replace(
-        "${{ Version }}",
-        str(version),
+    today = date.today()
+
+    contents_to_write = (
+        template.replace(
+            "${{ Date }}",
+            today.strftime("%#d %B %Y"),
+        )
+        .replace(
+            "${{ Year }}",
+            str(today.year),
+        )
+        .replace(
+            "${{ Version }}",
+            str(version),
+        )
     )
 
     with open("version.h", "w", encoding="utf-8") as file:
