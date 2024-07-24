@@ -6,7 +6,7 @@ from utils.version import get_version
 def main():
     version = get_version()
 
-    with open("version.h.template", "r", encoding="utf-8") as file:
+    with open("version.h.template", encoding="utf-8") as file:
         template = file.read()
 
     today = date.today()
