@@ -19,7 +19,7 @@ def _format_licence(title, path):
     # Use StringIO to translate newlines to the OS line ending
     with StringIO(newline=os.linesep) as stream:
         entry_text = f"""{title}
-{'—' * len(title)}
+{"—" * len(title)}
 
 {licence_text}
 """
