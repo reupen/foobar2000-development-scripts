@@ -14,7 +14,11 @@ BUILD_CONFIG_FILE_NAME = "build-config.toml"
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--no-symstore", action="store_true")
+parser.add_argument(
+    "--symstore",
+    choices=["silent", "skip", "prompt"],
+    default="silent",
+)
 parser.add_argument("--msbuild-extra-args", default="")
 
 
@@ -139,7 +143,15 @@ def main():
         use_lzma=True,
     )
 
-    if args.no_symstore:
+    skip_symstore = args.symstore == "skip"
+
+    if args.symstore == "prompt":
+        user_input = input(
+            "Do you want to add the generated symbols to the symbol store? (y/n): "
+        )
+        skip_symstore = user_input.strip().lower() != "y"
+
+    if skip_symstore:
         print("Skipping update of symbol store...")
         print("Done!")
         return
