@@ -15,15 +15,17 @@ BUILD_CONFIG_FILE_NAME = "build-config.toml"
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--no-symstore", action="store_true")
+parser.add_argument("--msbuild-extra-args", default="")
 
 
-def build(msbuild_path, platform, solution_path):
+def build(msbuild_path, msbuild_extra_args, platform, solution_path):
     root_dir = get_root_dir()
     subprocess.run(
         [
             msbuild_path,
             "/m",
             f"/p:Configuration=Release;Platform={platform}",
+            msbuild_extra_args,
             "/t:Rebuild",
             root_dir / solution_path,
         ],
@@ -89,8 +91,8 @@ def main():
     if not msbuild_path:
         raise FileNotFoundError("MSBuild could not be found")
 
-    build(msbuild_path, "Win32", solution_path)
-    build(msbuild_path, "x64", solution_path)
+    build(msbuild_path, args.msbuild_extra_args, "Win32", solution_path)
+    build(msbuild_path, args.msbuild_extra_args, "x64", solution_path)
 
     Path(root_dir / output_path).mkdir(exist_ok=True)
 
