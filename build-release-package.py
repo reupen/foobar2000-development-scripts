@@ -10,9 +10,6 @@ from utils.path import get_root_dir
 from utils.version import get_version
 from utils.zip import write_zip
 
-BUILD_CONFIG_FILE_NAME = "build-config.toml"
-
-
 parser = argparse.ArgumentParser()
 parser.add_argument(
     "--symstore",
@@ -71,6 +68,7 @@ def main():
     output_path = build_config["output_path"]
     x86_build_path = build_config["x86_build_path"]
     x64_build_path = build_config["x64_build_path"]
+    vs_version = build_config.get("vs_version", "[17,18)")
 
     version = get_version()
 
@@ -79,8 +77,9 @@ def main():
         [
             rf"{program_files_x86_path}\Microsoft Visual Studio\Installer\vswhere.exe",
             "-utf8",
+            "-latest",
             "-version",
-            "17",
+            vs_version,
             "-requires",
             "Microsoft.Component.MSBuild",
             "-find",
