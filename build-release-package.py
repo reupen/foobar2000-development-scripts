@@ -5,7 +5,7 @@ import subprocess
 from pathlib import Path
 
 from utils.config import get_build_config
-from utils.licence import generate_licence_text
+from utils.licence import get_licence_text
 from utils.path import get_root_dir
 from utils.version import get_version
 from utils.zip import write_zip
@@ -110,22 +110,18 @@ def main():
     x64_dll_path = root_dir / x64_build_path / f"{component_name}.dll"
     x64_pdb_path = root_dir / x64_build_path / f"{component_name}.pdb"
 
-    licences = [
-        (licence["title"], root_dir / licence["path"])
-        for licence in build_config.get("licences", [])
-    ]
-    memory_files = {
-        "LICENSE.txt": generate_licence_text(licences),
-    }
+    if licence_file := build_config.get("licence_file"):
+        licence_path = root_dir / licence_file
+        memory_files = {"LICENSE.txt": get_licence_text(licence_path)}
+    else:
+        memory_files = None
 
-    write_zip(
-        component_archive_path,
-        [
-            (x86_dll_path, rf"{component_name}.dll"),
-            (x64_dll_path, rf"x64\{component_name}.dll"),
-        ],
-        memory_files=memory_files,
-    )
+    files = [
+        (x86_dll_path, rf"{component_name}.dll"),
+        (x64_dll_path, rf"x64\{component_name}.dll"),
+    ]
+
+    write_zip(component_archive_path, files, memory_files=memory_files)
 
     symbols_archive_name = f"{component_name}-{version}.x86-x64.symbols.lzma.zip"
     symbols_archive_path = root_dir / output_path / symbols_archive_name

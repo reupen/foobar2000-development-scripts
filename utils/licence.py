@@ -1,28 +1,6 @@
-import os
-from io import StringIO
-from os import linesep
+from pathlib import Path
 
 
-def generate_licence_text(licences):
-    if not licences:
-        return None
-
-    return f"{linesep * 2}".join(
-        _format_licence(title, path) for title, path in licences
-    )
-
-
-def _format_licence(title, path):
-    with open(path, encoding="utf-8") as file:
-        licence_text = file.read()
-
-    # Use StringIO to translate newlines to the OS line ending
-    with StringIO(newline=os.linesep) as stream:
-        entry_text = f"""{title}
-{"—" * len(title)}
-
-{licence_text}
-"""
-
-        stream.write(entry_text)
-        return stream.getvalue()
+def get_licence_text(licence_path: Path):
+    licence_text = licence_path.read_text(encoding="utf-8")
+    return "\r\n".join(licence_text.splitlines())
