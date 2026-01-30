@@ -3,7 +3,7 @@ import os
 from pathlib import PurePath
 
 from utils.config import get_build_config
-from utils.licence import generate_licence_text
+from utils.licence import get_licence_text
 from utils.path import get_root_dir
 from utils.version import get_version
 from utils.zip import write_zip
@@ -35,17 +35,15 @@ def main():
         f"{args.output_dir}{input_base_name}{annotation}.{platform}.fb2k-component"
     )
 
-    licences = [
-        (licence["title"], root_dir / licence["path"])
-        for licence in build_config.get("licences", [])
-    ]
-    memory_files = {
-        "LICENSE.txt": generate_licence_text(licences),
-    }
+    if licence_file := build_config.get("licence_file"):
+        licence_path = root_dir / licence_file
+        memory_files = {"LICENSE.txt": get_licence_text(licence_path)}
+    else:
+        memory_files = None
 
-    write_zip(
-        output_path, [(component_path, component_path.name)], memory_files=memory_files
-    )
+    files = [(component_path, component_path.name)]
+
+    write_zip(output_path, files, memory_files=memory_files)
 
     print(f"Archive created: {output_path}")
 
