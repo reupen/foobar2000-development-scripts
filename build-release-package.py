@@ -68,7 +68,7 @@ def main():
     output_path = build_config["output_path"]
     x86_build_path = build_config["x86_build_path"]
     x64_build_path = build_config["x64_build_path"]
-    vs_version = build_config.get("vs_version", "[17,18)")
+    vs_version = build_config.get("vs_version", "[18,19)")
 
     version = get_version()
 
