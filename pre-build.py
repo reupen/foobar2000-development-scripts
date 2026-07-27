@@ -1,4 +1,5 @@
-from datetime import date
+#!/usr/bin/env python3
+from datetime import datetime
 
 from utils.version import get_version
 
@@ -9,7 +10,7 @@ def main():
     with open("version.h.template", encoding="utf-8") as file:
         template = file.read()
 
-    today = date.today()
+    today = datetime.now().astimezone().date()
 
     contents_to_write = (
         template.replace(
