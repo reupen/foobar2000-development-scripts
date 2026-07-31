@@ -10,16 +10,16 @@ def main():
     with open("version.h.template", encoding="utf-8") as file:
         template = file.read()
 
-    today = datetime.now().astimezone().date()
+    now = datetime.now().astimezone()
 
     contents_to_write = (
         template.replace(
             "${{ Date }}",
-            today.strftime("%#d %B %Y"),
+            now.strftime("%#d %B %Y"),
         )
         .replace(
             "${{ Year }}",
-            str(today.year),
+            str(now.year),
         )
         .replace(
             "${{ Version }}",
